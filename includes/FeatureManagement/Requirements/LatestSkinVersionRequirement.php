@@ -22,14 +22,31 @@
 
 namespace Vector\FeatureManagement\Requirements;
 
-use MediaWiki\User\UserOptionsLookup;
-use User;
 use Vector\Constants;
 use Vector\FeatureManagement\Requirement;
-use WebRequest;
+use Vector\SkinVersionLookup;
 
 /**
- * Checks if the current skin is modern Vector.
+ * Retrieve the skin version for the request and compare it with `Constants::SKIN_VERSION_LATEST`.
+ * This requirement is met if the two are equal.
+ *
+ * Skin version is evaluated in the following order:
+ *
+ * - `useskinversion` URL query parameter override. See `README.md`.
+ *
+ * - User preference. The `User` object for new and existing accounts are updated by hook according
+ *   to the `VectorDefaultSkinVersionForNewAccounts` and
+ *  `VectorDefaultSkinVersionForExistingAccounts` config values. See the `Vector\Hooks` class and
+ *  `skin.json`.
+ *
+ *   If the skin version is evaluated prior to `User` preference hook invocations, an incorrect
+ *   version may be returned as only query parameter and site configuration will be known.
+ *
+ * - Site configuration default. The default is controlled by the `VectorDefaultSkinVersion` config
+ *   value. This is used for anonymous users and as a fallback configuration. See `skin.json`.
+ *
+ * This majority of this class is taken from Stephen Niedzielski's `Vector\SkinVersionLookup` class,
+ * which was introduced in `d1072d0fdfb1`.
  *
  * @unstable
  *
@@ -39,31 +56,17 @@ use WebRequest;
 final class LatestSkinVersionRequirement implements Requirement {
 
 	/**
-	 * @var WebRequest
+	 * @var SkinVersionLookup
 	 */
-	private $request;
-
-	/**
-	 * @var User
-	 */
-	private $user;
-
-	/**
-	 * @var UserOptionsLookup
-	 */
-	private $userOptionsLookup;
+	private $skinVersionLookup;
 
 	/**
 	 * This constructor accepts all dependencies needed to obtain the skin version.
 	 *
-	 * @param WebRequest $request
-	 * @param User $user
-	 * @param UserOptionsLookup $userOptionsLookup
+	 * @param SkinVersionLookup $skinVersionLookup
 	 */
-	public function __construct( WebRequest $request, User $user, UserOptionsLookup $userOptionsLookup ) {
-		$this->request = $request;
-		$this->user = $user;
-		$this->userOptionsLookup = $userOptionsLookup;
+	public function __construct( SkinVersionLookup $skinVersionLookup ) {
+		$this->skinVersionLookup = $skinVersionLookup;
 	}
 
 	/**
@@ -78,14 +81,6 @@ final class LatestSkinVersionRequirement implements Requirement {
 	 * @throws \ConfigException
 	 */
 	public function isMet(): bool {
-		$useSkin = $this->request->getVal( 'useskin' );
-		$user = $this->user;
-		if ( !$useSkin && $user->isSafeToLoad() ) {
-			$useSkin = $this->userOptionsLookup->getOption(
-				$user,
-				Constants::PREF_KEY_SKIN
-			);
-		}
-		return $useSkin === Constants::SKIN_NAME_MODERN;
+		return $this->skinVersionLookup->getVersion() === Constants::SKIN_VERSION_LATEST;
 	}
 }
