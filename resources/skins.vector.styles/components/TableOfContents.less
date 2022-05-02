@@ -26,14 +26,13 @@
 		border: 0;
 	}
 
-	.sidebar-toc-link > * {
-		// Prevent click events on the link's contents so that we can use event
-		// delegation and have the target be the anchor element instead.
-		pointer-events: none;
-	}
-
 	.sidebar-toc-numb {
 		display: none;
+	}
+
+	.sidebar-toc-link {
+		word-break: break-word;
+		color: @color-link;
 	}
 
 	.sidebar-toc-text {
