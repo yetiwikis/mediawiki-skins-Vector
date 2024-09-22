@@ -146,7 +146,8 @@
 						"searchsuggest-search",
 						"sitesubtitle",
 						"sitetitle",
-						"tagline"
+						"tagline",
+						"sidebar-contents"
 					]
 				}
 			]
