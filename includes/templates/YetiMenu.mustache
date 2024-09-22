@@ -1,0 +1,26 @@
+{{!
+	Copyright Yeti Wikis 2024
+}}
+<nav id="msw-contents">
+	<ul class="level-0">
+{{#contents}}
+		<li data-shown="none">
+			<a {{^no-link}}href="/w/{{link}}"{{/no-link}}>{{title}}</a>
+			<ul class="level-1">
+			{{#sub}}
+				<li>
+					<a {{^no-link}}href="/w/{{link}}"{{/no-link}} class="link-level-1">{{title}}</a>
+					<ul class="level-2">
+					{{#sub}}
+						<li>
+							<a {{^no-link}}href="/w/{{link}}"{{/no-link}} class="link-level-2">{{title}}</a>
+						</li>
+					{{/sub}}
+					</ul>
+				</li>
+			{{/sub}}
+			</ul>
+		</li>
+{{/contents}}
+	</ul>
+</nav>

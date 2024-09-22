@@ -46,6 +46,7 @@ class SkinVectorLegacy extends SkinMustache {
 		$mainMenuData['data-portlets-first'] = $this->decoratePortletData(
 			'navigation', $mainMenuData['data-portlets-first']
 		);
+		$mainMenuData['data-sidebar-contents'] = $this->generateNewSidebar();
 		$rest = $mainMenuData['array-portlets-rest'];
 		foreach ( $rest as $key => $pData ) {
 			$rest[$key] = $this->decoratePortletData(
@@ -124,6 +125,32 @@ class SkinVectorLegacy extends SkinMustache {
 			'is-dropdown' => $type === self::MENU_TYPE_DROPDOWN,
 			'is-portal' => $type === self::MENU_TYPE_PORTAL,
 		];
+	}
+
+	private function generateNewSidebar() {
+		$text = $this->msg( 'sidebar-contents' )->inContentLanguage()->plain();
+		$json = json_decode($text, true);
+
+		return [
+			"contents" => $this->parseNewSidebarLinks($json)
+		];
+	}
+
+	private function parseNewSidebarLinks( &$json ) {
+		foreach($json as $key => $value) {
+			if (!isset($value['link'])) {
+				$json[$key]['link'] = $value['title'];
+			}
+			if (isset($value['link']) && $value['link'] === '#') {
+				$json[$key]['no-link'] = true;
+			} else {
+				$json[$key]['no-link'] = false;
+			}
+			if (isset($value['sub'])) {
+				$json[$key]['sub'] = $this->parseNewSidebarLinks($value['sub']);
+			}
+		}
+		return $json;
 	}
 
 	/**
